@@ -45,6 +45,13 @@ import Layout from '@layouts/Layout.astro';
 
 <script>
     document.addEventListener('astro:page-load', ()=> {
+        const arena = (name: string)=> {
+            switch(name) {
+                case 'Arena_L11.webp': return 'Cabaña del leñador';
+                default: return '';
+            }
+        };
+            
         const info = JSON.parse(localStorage.getItem('profile_info') ?? '');
 
         (document.querySelector('#name') as HTMLSpanElement).innerHTML = info.name;
@@ -53,11 +60,12 @@ import Layout from '@layouts/Layout.astro';
         (document.querySelector('#trophies') as HTMLSpanElement).innerHTML += info.trophies;
         (document.querySelector('#wins') as HTMLSpanElement).innerHTML += info.wins;
         (document.querySelector('#arena_picture') as HTMLImageElement).setAttribute('src', `${ info.arena }.webp`);
-        (document.querySelector('#arena_name') as HTMLSpanElement).innerHTML = info.arena;
+
+        const arenaName = Object.keys(arena).filter((key)=> key == info.arena).at(0) ?? 'Arena_L11.webp';
+        (document.querySelector('#arena_name') as HTMLSpanElement).innerHTML = arena(arenaName);
+
         (document.querySelector('#card_picture') as HTMLImageElement).setAttribute('src', info.favoriteCard.picture);
         (document.querySelector('#card_name') as HTMLSpanElement).innerHTML = info.favoriteCard.name;
         (document.querySelector('#card_elixir') as HTMLSpanElement).innerHTML = info.favoriteCard.elixirCost;
-
-        console.log(info.arena)
     });
 </script>

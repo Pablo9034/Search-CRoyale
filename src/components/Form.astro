@@ -1,0 +1,70 @@
+---
+const profile_tag = Astro.cookies.get('profile_tag')?.value ?? '';
+---
+
+<form class="px-5 py-10 w-80 bg-white/60 backdrop-blur rounded-xl flex flex-col gap-5 text-xl shadow-lg">
+    <h2 class="font-bold text-4xl text-center bg-linear-to-b from-yellow-400 via-yellow-500 to-yellow-400 bg-clip-text text-transparent">Iniciar Sesión</h2>
+            
+    <label class="inline-flex flex-col gap-1">
+        <span>Etiqueta del Perfil:</span>
+        <input id="profile_tag" type="text" name="profile_tag" placeholder="Ej: #R0YAL1234" value={ profile_tag } class="px-3 py-1 outline-none rounded border-2 border-gray-200 bg-linear-to-b from-gray-100 to-white uppercase" />
+        <span id="error" class="h-7 text-red-500"></span>
+    </label>
+            
+    <a href="#" class="text-base text-blue-700 underline">Dónde encontrar la etiqueta del perfil?</a>
+
+    <input type="submit" id="btn" value="Buscar Perfil" disabled class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 hover:cursor-pointer transition disabled:bg-gray-400 disabled:cursor-not-allowed"/>
+</form>
+
+<script>
+    import { actions } from 'astro:actions';
+
+    document.addEventListener('astro:page-load', ()=> {
+        const $form = document.querySelector('form') as HTMLFormElement;
+        const $inputProfileTag = document.querySelector('#profile_tag') as HTMLInputElement;
+        const $btn = document.querySelector('#btn') as HTMLInputElement as HTMLInputElement;
+
+        $form.addEventListener('submit', async (event)=> {
+            event.preventDefault();
+            
+            const fromData = new FormData($form);
+            const { data, error } = await actions.authAction(fromData);
+
+            if(error) {
+                $inputProfileTag.classList.add('border-red-400', 'animate-pulse');
+                (document.querySelector('#error') as HTMLSpanElement)
+                    .innerHTML = error.message;
+            }
+
+            localStorage.setItem('profile_info', JSON.stringify({
+                name: data.name,
+                tag: data.tag,
+                level: data.expLevel,
+                trophies: data.trophies,
+                wins: data.wins,
+                arena: data.arena.name,
+                favoriteCard: {
+                    name: data.currentFavouriteCard.name,
+                    elixirCost: data.currentFavouriteCard.elixirCost,
+                    picture: data.currentFavouriteCard.iconUrls.medium
+                }
+            }));
+
+            return window.location.replace(`/`);
+        });
+
+        if($inputProfileTag.value[0] === '#' && $inputProfileTag.value.length === 10) {
+            $btn.disabled = false;
+        } else {
+            $btn.disabled = true;
+        }
+
+        $inputProfileTag.addEventListener('input', ()=> {
+            if($inputProfileTag.value[0] === '#' && $inputProfileTag.value.length === 10) {
+                $btn.disabled = false;
+            } else {
+                $btn.disabled = true;
+            }
+        });
+    });
+</script>
